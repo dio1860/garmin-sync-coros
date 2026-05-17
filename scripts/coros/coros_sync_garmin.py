@@ -84,5 +84,5 @@ if __name__ == "__main__":
       
     except Exception as err:
       print(err)
-      coros_db.updateExceptionSyncStatus(un_sync)
-      exit()
+      coros_db.updateExceptionSyncStatus(id)
+  # exit()
