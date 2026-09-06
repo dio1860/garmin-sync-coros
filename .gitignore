@@ -32,3 +32,5 @@ config.yaml
 /webdav-fit
 /garmin-fit
 /coros-fit
+/db
+sync-coros-garmin.ps1

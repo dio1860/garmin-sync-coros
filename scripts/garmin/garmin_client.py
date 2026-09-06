@@ -106,6 +106,7 @@ class GarminClient:
     )
 
     if allowed_file_extension:
+       status = "UPLOAD_EXCEPTION"
        try:
         with open(activity_path, 'rb') as file:
           file_data = file.read()
@@ -124,9 +125,11 @@ class GarminClient:
           if res_code == 202 and not isDuplicateUpload:
               status = "SUCCESS"
           elif res_code == 409 and result.get("detailedImportResult").get("failures")[0].get('messages')[0].get('content') == "Duplicate Activity.":
-              status = "DUPLICATE_ACTIVITY" 
+              status = "DUPLICATE_ACTIVITY"
+          else:
+              print(f"  -> HTTP {res_code}: {result}")
        except Exception as e:
-            print(e)
+            print(f"  -> exception: {e}")
             status = "UPLOAD_EXCEPTION"
        finally:
             return status
