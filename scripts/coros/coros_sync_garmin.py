@@ -78,18 +78,20 @@ if __name__ == "__main__":
       sport_type = un_sync["sportType"]
       file = corosClient.downloadActivitie(id, sport_type)
       raw = file.data
-      if zipfile.is_zipfile(io.BytesIO(raw)):
-        zf = zipfile.ZipFile(io.BytesIO(raw))
-        fit_names = [n for n in zf.namelist() if n.endswith('.fit')]
-        statuses = []
-        for fit_name in fit_names:
-          fit_path = os.path.join(COROS_FIT_DIR, os.path.basename(fit_name))
-          with open(fit_path, "wb") as fb:
-            fb.write(zf.read(fit_name))
-          s = garminClient.upload_activity(fit_path)
-          print(f"{fit_name} upload status {s}")
-          statuses.append(s)
-        upload_status = "SUCCESS" if any(s == "SUCCESS" for s in statuses) else statuses[0] if statuses else "UPLOAD_EXCEPTION"
+      buf = io.BytesIO(raw)
+      if zipfile.is_zipfile(buf):
+        buf.seek(0)
+        with zipfile.ZipFile(buf) as zf:
+          fit_names = [n for n in zf.namelist() if n.endswith('.fit')]
+          statuses = []
+          for fit_name in fit_names:
+            fit_path = os.path.join(COROS_FIT_DIR, f"{id}-{os.path.basename(fit_name)}")
+            with open(fit_path, "wb") as fb:
+              fb.write(zf.read(fit_name))
+            s = garminClient.upload_activity(fit_path)
+            print(f"{fit_name} upload status {s}")
+            statuses.append(s)
+          upload_status = "SUCCESS" if any(s == "SUCCESS" for s in statuses) else statuses[0] if statuses else "UPLOAD_EXCEPTION"
       else:
         file_path = os.path.join(COROS_FIT_DIR, f"{id}.fit")
         with open(file_path, "wb") as fb:
